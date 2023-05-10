@@ -1,2 +1,2 @@
 VERSION_PREFIX=v
-GIT_SIGN=false
+GIT_SIGN=true
