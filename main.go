@@ -263,25 +263,18 @@ func createTag(tagName string, sign bool) error {
 	if sign {
 		signFlag = "-s"
 	}
-	cmd := exec.Command("git", "tag", signFlag, "-m", "Version "+tagName, tagName)
-	stderr, err := cmd.StderrPipe()
+	out, err := exec.Command("git", "tag", signFlag, "-m", "Version "+tagName, tagName).CombinedOutput()
 	if err != nil {
-		return err
-	}
-	if err := cmd.Start(); err != nil {
-		return err
-	}
-	out, _ := io.ReadAll(stderr)
-	fmt.Fprintf(os.Stderr, string(out))
-	if err := cmd.Wait(); err != nil {
+		fmt.Fprintln(os.Stderr, string(out))
 		return err
 	}
 	return nil
 }
 
 func getVersion(versionPrefix string) (*semver.Version, error) {
-	out, err := exec.Command("git", "tag").Output()
+	out, err := exec.Command("git", "tag").CombinedOutput()
 	if err != nil {
+		fmt.Fprintln(os.Stderr, string(out))
 		return nil, err
 	}
 	var latest *semver.Version
