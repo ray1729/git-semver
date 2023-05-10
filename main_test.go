@@ -30,6 +30,10 @@ func TestParseConfig(t *testing.T) {
 			expect: config{versionPrefix: "v", sign: true},
 		},
 		{
+			input:  "# My config\nversion_prefix=v\ngit_sign=t\n",
+			expect: config{versionPrefix: "v", sign: true},
+		},
+		{
 			input:  "VERSION_PREFIX=v\nGIT_SIGN=false\n",
 			expect: config{versionPrefix: "v", sign: false},
 		},
