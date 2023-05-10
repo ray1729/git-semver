@@ -132,6 +132,8 @@ func nextVersion(inc string) func(*cli.Context) error {
 				newVer = v.IncMinor()
 			case "major":
 				newVer = v.IncMajor()
+			default:
+				newVer = *v
 			}
 		}
 		if c.IsSet("pre-release") {
