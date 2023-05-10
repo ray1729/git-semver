@@ -235,11 +235,15 @@ func parseConfig(f io.Reader) (config, error) {
 		}
 		k, v, ok := strings.Cut(t, "=")
 		if !ok {
-			return conf, fmt.Errorf("invalid configuration: %s", t)
+			return conf, fmt.Errorf("error parsing %s: invalid syntax", t)
 		}
 		k, v = strings.TrimSpace(k), strings.TrimSpace(v)
 		if len(v) >= 2 && strings.HasPrefix(v, "\"") && strings.HasSuffix(v, "\"") {
-			v = strings.Trim(v, "\"")
+			unquotedV, err := strconv.Unquote(v)
+			if err != nil {
+				return conf, fmt.Errorf("error parsing %s: invalid quoted string", t)
+			}
+			v = unquotedV
 		}
 		switch strings.ToUpper(k) {
 		case "VERSION_PREFIX":
@@ -247,17 +251,14 @@ func parseConfig(f io.Reader) (config, error) {
 		case "GIT_SIGN":
 			b, err := strconv.ParseBool(v)
 			if err != nil {
-				return conf, fmt.Errorf("error parsing GIT_SIGN %q: %v", v, err)
+				return conf, fmt.Errorf("error parsing %s: invalid boolean value", t)
 			}
 			conf.sign = b
 		default:
-			return conf, fmt.Errorf("unrecognized configuration variable: %s", k)
+			return conf, fmt.Errorf("error parsing %s: unrecognized variable", t)
 		}
 	}
-	if err := s.Err(); err != nil {
-		return conf, err
-	}
-	return conf, nil
+	return conf, s.Err()
 }
 
 func createTag(tagName string, sign bool) error {
