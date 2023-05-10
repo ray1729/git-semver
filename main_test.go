@@ -77,6 +77,7 @@ func TestParseConfig(t *testing.T) {
 			} else {
 				if err != nil {
 					t.Errorf("got unexpected error: %v", err)
+					return
 				}
 				if res.versionPrefix != tc.expect.versionPrefix {
 					t.Errorf("got versionPrefix %s, expected %s", res.versionPrefix, tc.expect.versionPrefix)
