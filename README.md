@@ -8,7 +8,7 @@ version is implemented using https://github.com/Masterminds/semver to parse and 
 ## Installation
 
 ```bash
-go install github.com/ray1729/git-semver
+go install github.com/ray1729/git-semver@v0.1.0
 ```
 
 ## Usage
