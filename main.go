@@ -147,13 +147,12 @@ func nextVersion(inc string) func(*cli.Context) error {
 			}
 		}
 		tagName := conf.versionPrefix + newVer.String()
+		if !c.Bool("dryrun") {
+			if err = createTag(tagName, conf.sign); err != nil {
+				return cli.Exit(err.Error(), 3)
+			}
+		}
 		fmt.Println(tagName)
-		if c.Bool("dryrun") {
-			return nil
-		}
-		if err = createTag(tagName, conf.sign); err != nil {
-			return cli.Exit(err.Error(), 3)
-		}
 		return nil
 	}
 }
@@ -264,7 +263,20 @@ func createTag(tagName string, sign bool) error {
 	if sign {
 		signFlag = "-s"
 	}
-	return exec.Command("git", "tag", signFlag, "-m", "Version "+tagName, tagName).Run()
+	cmd := exec.Command("git", "tag", signFlag, "-m", "Version "+tagName, tagName)
+	stderr, err := cmd.StderrPipe()
+	if err != nil {
+		return err
+	}
+	if err := cmd.Start(); err != nil {
+		return err
+	}
+	out, _ := io.ReadAll(stderr)
+	fmt.Fprintf(os.Stderr, string(out))
+	if err := cmd.Wait(); err != nil {
+		return err
+	}
+	return nil
 }
 
 func getVersion(versionPrefix string) (*semver.Version, error) {
